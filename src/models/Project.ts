@@ -1,6 +1,6 @@
 /**
  * Project Model
- * 
+ *
  * This model represents a project in the task management system.
  * It demonstrates:
  * 1. TypeScript interfaces for type safety
@@ -10,18 +10,17 @@
  * 5. Custom validations and hooks
  */
 
-import { Model, DataTypes } from 'sequelize';
-import { User } from './User';
-import { Task } from './Task';
-import sequelize from '../config/database';
+import { Model, DataTypes } from "sequelize";
+import { User } from "./User";
+import { Task } from "./Task";
+import sequelize from "../config/database";
 
 // Keep the simple enum type
-export type ProjectStatus = 'active' | 'completed' | 'on_hold' | 'cancelled';
-
+export type ProjectStatus = "active" | "completed" | "on_hold" | "cancelled";
 
 /**
  * Project Model Class
- * 
+ *
  * Extends Sequelize's Model class to create a Project model with:
  * - Type-safe attributes
  * - Validations
@@ -46,12 +45,12 @@ export class Project extends Model {
 
   /**
    * Calculate the project's progress based on its tasks
-   * 
+   *
    * This method:
    * 1. Fetches all tasks associated with the project
    * 2. Calculates the percentage of completed tasks
    * 3. Returns the progress as a percentage string
-   * 
+   *
    * @returns Promise<string> - Progress percentage (e.g., "75%")
    */
   public async getProgress(): Promise<string> {
@@ -59,9 +58,8 @@ export class Project extends Model {
     // 1. Get all tasks associated with the project
     // 2. Calculate the percentage of completed tasks
     // 3. Return the progress as a percentage string
-    return '0%';
+    return "0%";
   }
-
 }
 
 // Initialize the Project model with Sequelize
@@ -70,30 +68,31 @@ Project.init(
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
-      primaryKey: true
+      primaryKey: true,
     },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        len: [3, 100] // Name must be between 3 and 100 characters
-      }
+        len: [3, 100], // Name must be between 3 and 100 characters
+      },
     },
     description: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
     },
     status: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 'active',
-      //TODO: Implement validation for status:
-      // 1. Must be one of: 'active', 'completed', 'on_hold', 'cancelled'
+      defaultValue: "active",
+      validate: {
+        isIn: [["active", "completed", "on_hold", "cancelled"]],
+      },
     },
     startDate: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: DataTypes.NOW
+      defaultValue: DataTypes.NOW,
     },
     endDate: {
       type: DataTypes.DATE,
@@ -102,45 +101,43 @@ Project.init(
         isAfterStartDate(value: Date) {
           const project = this as unknown as Project;
           if (value <= project.startDate) {
-            throw new Error('End date must be after start date');
+            throw new Error("End date must be after start date");
           }
-        }
-      }
+        },
+      },
     },
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'users',
-        key: 'id'
-      }
+        model: "users",
+        key: "id",
+      },
     },
-  
-    
+
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: DataTypes.NOW
+      defaultValue: DataTypes.NOW,
     },
     updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: DataTypes.NOW
-    }
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     sequelize,
-    tableName: 'projects',
-    modelName: 'Project',
+    tableName: "projects",
+    modelName: "Project",
     timestamps: true, // Adds createdAt and updatedAt fields
     indexes: [
       {
-        fields: ['userId'], // Index for faster user-based queries
+        fields: ["userId"], // Index for faster user-based queries
       },
       {
-        fields: ['status'], // Index for faster status-based queries
-      }
+        fields: ["status"], // Index for faster status-based queries
+      },
     ],
-   
   }
-); 
+);
